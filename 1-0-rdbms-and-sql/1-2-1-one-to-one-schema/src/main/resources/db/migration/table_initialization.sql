@@ -23,3 +23,23 @@ should have a column that stores primary key from a parent table, which is a for
 */
 
 -- TODO: implement the SQL according to the description
+CREATE TABLE if not exists users (
+    id bigint,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) not null,
+    birthday DATE NOT NULL,
+    constraint users_PK primary key (id),
+    constraint users_email_AK unique (email)
+);
+
+
+CREATE TABLE if not exists profiles (
+    user_id bigint,
+    job_position VARCHAR(255),
+    company varchar(255),
+    education VARCHAR(255),
+    city VARCHAR(255),
+    constraint profiles_PK primary key (user_id),
+    constraint profiles_users_FK foreign key (user_id) references users
+);
