@@ -3,12 +3,26 @@ package com.bobocode;
 import com.bobocode.util.ExerciseNotCompletedException;
 
 import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * {@link AccountDbInitializer} provides an API that allow to initialize (create) an Account table in the database
  */
 public class AccountDbInitializer {
+
+    private static final String DATABASE_INITIALIZATION_FILE = "db/table_initialization.sql";
+
     private DataSource dataSource;
 
     public AccountDbInitializer(DataSource dataSource) {
@@ -29,7 +43,28 @@ public class AccountDbInitializer {
      *
      * @throws SQLException
      */
+
     public void init() throws SQLException {
-        throw new ExerciseNotCompletedException(); // todo
+
+        String sql = readSQLFromFile(DATABASE_INITIALIZATION_FILE);
+
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            statement.execute(sql);
+        }
+    }
+
+    private String readSQLFromFile(String fileName) {
+        Objects.requireNonNull(fileName);
+
+        try (
+                InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            return reader.lines().collect(Collectors.joining());
+        }
+        catch(IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
